@@ -36,8 +36,6 @@ bd ready                 # Available work in this rig
 
 ## Beads Quick Reference
 
-Issue prefix for this rig: `bd-`
-
 ```bash
 bd ready                 # Available work
 bd show <id>             # Issue details
@@ -45,6 +43,17 @@ bd create --title="..." --type=task
 bd close <id>            # Mark complete
 bd sync                  # Sync with remote
 ```
+
+## Prefix Options
+
+Initialize with a custom prefix or no prefix:
+
+```bash
+bd init --prefix myproj   # IDs: myproj-abc123
+bd init --no-prefix       # IDs: abc123 (hash only, saves chars)
+```
+
+Hash-only IDs (`--no-prefix`) are useful when ID space is at a premium.
 
 ## Project Context
 

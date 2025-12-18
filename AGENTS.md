@@ -625,7 +625,8 @@ Happy coding! 🔗
 **FIRST TIME?** Just run `bd init` - it auto-imports issues from git:
 
 ```bash
-bd init --prefix bd
+bd init --prefix bd        # IDs: bd-abc123
+bd init --no-prefix        # IDs: abc123 (hash only, saves characters)
 ```
 
 **OSS Contributor?** Use the contributor wizard for fork workflows:
