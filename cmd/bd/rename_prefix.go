@@ -187,8 +187,9 @@ NOTE: This is a rare operation. Most users never need this command.`,
 func validatePrefix(prefix string) error {
 	prefix = strings.TrimRight(prefix, "-")
 
+	// Allow empty prefix for minimal IDs (just the hash, no prefix)
 	if prefix == "" {
-		return fmt.Errorf("prefix cannot be empty")
+		return nil
 	}
 
 	if len(prefix) > 8 {

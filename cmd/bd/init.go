@@ -38,6 +38,7 @@ With --stealth: configures global git settings for invisible beads usage:
   Perfect for personal use without affecting repo collaborators.`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		prefix, _ := cmd.Flags().GetString("prefix")
+		noPrefix, _ := cmd.Flags().GetBool("no-prefix")
 		quiet, _ := cmd.Flags().GetBool("quiet")
 		branch, _ := cmd.Flags().GetString("branch")
 		contributor, _ := cmd.Flags().GetBool("contributor")
@@ -83,37 +84,40 @@ With --stealth: configures global git settings for invisible beads usage:
 			}
 		}
 
-		// Determine prefix with precedence: flag > config > auto-detect from git > auto-detect from directory name
-		if prefix == "" {
-			// Try to get from config file
-			prefix = config.GetString("issue-prefix")
-		}
+		// Determine prefix with precedence: --no-prefix > flag > config > auto-detect from git > auto-detect from directory name
+		// If --no-prefix is set, use empty prefix (IDs are just the hash)
+		if !noPrefix {
+			if prefix == "" {
+				// Try to get from config file
+				prefix = config.GetString("issue-prefix")
+			}
 
-		// auto-detect prefix from first issue in JSONL file
-		if prefix == "" {
-			issueCount, jsonlPath, gitRef := checkGitForIssues()
-			if issueCount > 0 {
-				firstIssue, err := readFirstIssueFromGit(jsonlPath, gitRef)
-				if firstIssue != nil && err == nil {
-					prefix = utils.ExtractIssuePrefix(firstIssue.ID)
+			// auto-detect prefix from first issue in JSONL file
+			if prefix == "" {
+				issueCount, jsonlPath, gitRef := checkGitForIssues()
+				if issueCount > 0 {
+					firstIssue, err := readFirstIssueFromGit(jsonlPath, gitRef)
+					if firstIssue != nil && err == nil {
+						prefix = utils.ExtractIssuePrefix(firstIssue.ID)
+					}
 				}
 			}
-		}
 
-		// auto-detect prefix from directory name
-		if prefix == "" {
-			// Auto-detect from directory name
-			cwd, err := os.Getwd()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: failed to get current directory: %v\n", err)
-				os.Exit(1)
+			// auto-detect prefix from directory name
+			if prefix == "" {
+				// Auto-detect from directory name
+				cwd, err := os.Getwd()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error: failed to get current directory: %v\n", err)
+					os.Exit(1)
+				}
+				prefix = filepath.Base(cwd)
 			}
-			prefix = filepath.Base(cwd)
-		}
 
-		// Normalize prefix: strip trailing hyphens
-		// The hyphen is added automatically during ID generation
-		prefix = strings.TrimRight(prefix, "-")
+			// Normalize prefix: strip trailing hyphens
+			// The hyphen is added automatically during ID generation
+			prefix = strings.TrimRight(prefix, "-")
+		}
 
 		// Create database
 		// Use global dbPath if set via --db flag or BEADS_DB env var, otherwise default to .beads/beads.db
@@ -221,8 +225,13 @@ With --stealth: configures global git settings for invisible beads usage:
 					fmt.Printf("\n%s bd initialized successfully in --no-db mode!\n\n", green("✓"))
 					fmt.Printf("  Mode: %s\n", cyan("no-db (JSONL-only)"))
 					fmt.Printf("  Issues file: %s\n", cyan(jsonlPath))
-					fmt.Printf("  Issue prefix: %s\n", cyan(prefix))
-					fmt.Printf("  Issues will be named: %s\n\n", cyan(prefix+"-1, "+prefix+"-2, ..."))
+					if prefix == "" {
+						fmt.Printf("  Issue prefix: %s\n", cyan("(none)"))
+						fmt.Printf("  Issues will be named: %s\n\n", cyan("abc123, xyz789, ... (hash only)"))
+					} else {
+						fmt.Printf("  Issue prefix: %s\n", cyan(prefix))
+						fmt.Printf("  Issues will be named: %s\n\n", cyan(prefix+"-1, "+prefix+"-2, ..."))
+					}
 					fmt.Printf("Run %s to get started.\n\n", cyan("bd --no-db quickstart"))
 				}
 				return
@@ -439,8 +448,13 @@ With --stealth: configures global git settings for invisible beads usage:
 
 		fmt.Printf("\n%s bd initialized successfully!\n\n", green("✓"))
 		fmt.Printf("  Database: %s\n", cyan(initDBPath))
-		fmt.Printf("  Issue prefix: %s\n", cyan(prefix))
-		fmt.Printf("  Issues will be named: %s\n\n", cyan(prefix+"-1, "+prefix+"-2, ..."))
+		if prefix == "" {
+			fmt.Printf("  Issue prefix: %s\n", cyan("(none)"))
+			fmt.Printf("  Issues will be named: %s\n\n", cyan("abc123, xyz789, ... (hash only)"))
+		} else {
+			fmt.Printf("  Issue prefix: %s\n", cyan(prefix))
+			fmt.Printf("  Issues will be named: %s\n\n", cyan(prefix+"-1, "+prefix+"-2, ..."))
+		}
 		fmt.Printf("Run %s to get started.\n\n", cyan("bd quickstart"))
 
 		// Run bd doctor diagnostics to catch setup issues early (bd-zwtq)
@@ -469,6 +483,7 @@ With --stealth: configures global git settings for invisible beads usage:
 
 func init() {
 	initCmd.Flags().StringP("prefix", "p", "", "Issue prefix (default: current directory name)")
+	initCmd.Flags().Bool("no-prefix", false, "Use no prefix (IDs are just the hash, e.g., 'abc123' instead of 'proj-abc123')")
 	initCmd.Flags().BoolP("quiet", "q", false, "Suppress output (quiet mode)")
 	initCmd.Flags().StringP("branch", "b", "", "Git branch for beads commits (default: current branch)")
 	initCmd.Flags().Bool("contributor", false, "Run OSS contributor setup wizard")

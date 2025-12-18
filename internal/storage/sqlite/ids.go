@@ -107,7 +107,12 @@ func IsHierarchicalID(id string) (isHierarchical bool, parentID string) {
 
 // ValidateIssueIDPrefix validates that an issue ID matches the configured prefix
 // Supports both top-level (bd-a3f8e9) and hierarchical (bd-a3f8e9.1) IDs
+// If prefix is empty, validation is skipped (any ID format is allowed)
 func ValidateIssueIDPrefix(id, prefix string) error {
+	// Empty prefix means no prefix validation needed
+	if prefix == "" {
+		return nil
+	}
 	expectedPrefix := prefix + "-"
 	if !strings.HasPrefix(id, expectedPrefix) {
 		return fmt.Errorf("issue ID '%s' does not match configured prefix '%s'", id, prefix)
@@ -277,6 +282,7 @@ func EnsureIDs(ctx context.Context, conn *sql.Conn, prefix string, issues []*typ
 // Supports adaptive length from 3-8 chars based on database size.
 // Includes a nonce parameter to handle same-length collisions.
 // Uses base36 encoding (0-9, a-z) for better information density than hex.
+// If prefix is empty, returns just the hash without a hyphen separator.
 func generateHashID(prefix, title, description, creator string, timestamp time.Time, length, nonce int) string {
 	// Combine inputs into a stable content string
 	// Include nonce to handle hash collisions
@@ -307,5 +313,9 @@ func generateHashID(prefix, title, description, creator string, timestamp time.T
 
 	shortHash := encodeBase36(hash[:numBytes], length)
 
+	// If no prefix, return just the hash (no hyphen separator)
+	if prefix == "" {
+		return shortHash
+	}
 	return fmt.Sprintf("%s-%s", prefix, shortHash)
 }

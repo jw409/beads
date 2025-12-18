@@ -63,14 +63,16 @@ func validateBatchIssuesWithCustomStatuses(issues []*types.Issue, customStatuses
 // generateBatchIDs generates IDs for all issues that need them atomically
 func (s *SQLiteStorage) generateBatchIDs(ctx context.Context, conn *sql.Conn, issues []*types.Issue, actor string, orphanHandling OrphanHandling, skipPrefixValidation bool) error {
 	// Get prefix from config (needed for both generation and validation)
+	// Empty prefix is valid (IDs are just the hash) but missing config is not
 	var prefix string
 	err := conn.QueryRowContext(ctx, `SELECT value FROM config WHERE key = ?`, "issue_prefix").Scan(&prefix)
-	if err == sql.ErrNoRows || prefix == "" {
+	if err == sql.ErrNoRows {
 		// CRITICAL: Reject operation if issue_prefix config is missing (bd-166)
 		return fmt.Errorf("database not initialized: issue_prefix config is missing (run 'bd init --prefix <prefix>' first)")
 	} else if err != nil {
 		return fmt.Errorf("failed to get config: %w", err)
 	}
+	// Note: empty prefix is now valid - allows hash-only IDs like "abc123"
 
 	// Generate or validate IDs for all issues
 	if err := EnsureIDs(ctx, conn, prefix, issues, actor, orphanHandling, skipPrefixValidation); err != nil {

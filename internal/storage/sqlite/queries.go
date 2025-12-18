@@ -148,15 +148,17 @@ func (s *SQLiteStorage) CreateIssue(ctx context.Context, issue *types.Issue, act
 	}()
 
 	// Get prefix from config (needed for both ID generation and validation)
+	// Empty prefix is valid (IDs are just the hash) but missing config is not
 	var prefix string
 	err = conn.QueryRowContext(ctx, `SELECT value FROM config WHERE key = ?`, "issue_prefix").Scan(&prefix)
-	if err == sql.ErrNoRows || prefix == "" {
+	if err == sql.ErrNoRows {
 		// CRITICAL: Reject operation if issue_prefix config is missing (bd-166)
 		// This prevents duplicate issues with wrong prefix
 		return fmt.Errorf("database not initialized: issue_prefix config is missing (run 'bd init --prefix <prefix>' first)")
 	} else if err != nil {
 		return fmt.Errorf("failed to get config: %w", err)
 	}
+	// Note: empty prefix is now valid - allows hash-only IDs like "abc123"
 
 	// Generate or validate ID
 	if issue.ID == "" {
