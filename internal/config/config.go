@@ -94,7 +94,7 @@ func Initialize() error {
 	
 	// Set defaults for additional settings
 	v.SetDefault("flush-debounce", "30s")
-	v.SetDefault("auto-start-daemon", true)
+	v.SetDefault("auto-start-daemon", false) // jw409: default to direct mode (avoids 10s timeout in WSL/agent contexts)
 	v.SetDefault("identity", "")
 	
 	// Routing configuration defaults
