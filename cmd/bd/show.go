@@ -554,6 +554,40 @@ var updateCmd = &cobra.Command{
 			updates["issue_type"] = issueType
 		}
 
+		// Dispatch fields (jw fork)
+		if cmd.Flags().Changed("capabilities") {
+			capabilities, _ := cmd.Flags().GetString("capabilities")
+			updates["capabilities"] = capabilities
+		}
+		if cmd.Flags().Changed("context") {
+			context, _ := cmd.Flags().GetString("context")
+			updates["context"] = context
+		}
+		if cmd.Flags().Changed("context-files") {
+			contextFiles, _ := cmd.Flags().GetString("context-files")
+			updates["context_files"] = contextFiles
+		}
+		if cmd.Flags().Changed("context-beads") {
+			contextBeads, _ := cmd.Flags().GetString("context-beads")
+			updates["context_beads"] = contextBeads
+		}
+		if cmd.Flags().Changed("complexity") {
+			complexity, _ := cmd.Flags().GetString("complexity")
+			updates["complexity"] = complexity
+		}
+		if cmd.Flags().Changed("agent") {
+			agent, _ := cmd.Flags().GetString("agent")
+			updates["agent"] = agent
+		}
+		if cmd.Flags().Changed("external-deps") {
+			externalDeps, _ := cmd.Flags().GetString("external-deps")
+			updates["external_deps"] = externalDeps
+		}
+		if cmd.Flags().Changed("external-blocks") {
+			externalBlocks, _ := cmd.Flags().GetString("external-blocks")
+			updates["external_blocks"] = externalBlocks
+		}
+
 		if len(updates) == 0 {
 			fmt.Println("No updates specified")
 			return

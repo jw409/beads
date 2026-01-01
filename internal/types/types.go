@@ -54,6 +54,20 @@ type Issue struct {
 
 	// Bonding fields (bd-rnnr): compound molecule lineage
 	BondedFrom []BondRef `json:"bonded_from,omitempty"` // For compounds: constituent protos
+
+	// Dispatch fields (jw fork): capability-based routing and context preservation
+	// All fields use TOON format: space or comma separated, parsed liberally (Postel's law)
+	Capabilities string `json:"capabilities,omitempty"` // Functional: "mcp-tools playwright gpu" or "mcp-tools, playwright, gpu"
+	Context      string `json:"context,omitempty"`      // Semantic: "auth-system-design gpu-pipeline-state"
+	ContextFiles string `json:"context_files,omitempty"` // Paths: "docs/specs/auth.md src/auth/"
+	ContextBeads string `json:"context_beads,omitempty"` // Related: "game1-abc hostname:/path/.beads:id"
+	Complexity   string `json:"complexity,omitempty"`    // trivial, low, medium, high
+	Agent        string `json:"agent,omitempty"`         // Recommended: claude-opus, gemini-2.5-pro, claude-sonnet
+
+	// Cross-repo fields (jw fork): multi-repository coordination
+	// Format: "hostname:/path/.beads:id hostname2:/path2/.beads:id2"
+	ExternalDeps   string `json:"external_deps,omitempty"`   // Cross-repo dependencies
+	ExternalBlocks string `json:"external_blocks,omitempty"` // Cross-repo blocks
 }
 
 // ComputeContentHash creates a deterministic hash of the issue's content.

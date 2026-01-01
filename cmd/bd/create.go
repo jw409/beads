@@ -248,6 +248,16 @@ var createCmd = &cobra.Command{
 			return
 		}
 
+		// Get dispatch fields (jw fork)
+		capabilities, _ := cmd.Flags().GetString("capabilities")
+		context, _ := cmd.Flags().GetString("context")
+		contextFiles, _ := cmd.Flags().GetString("context-files")
+		contextBeads, _ := cmd.Flags().GetString("context-beads")
+		complexity, _ := cmd.Flags().GetString("complexity")
+		agent, _ := cmd.Flags().GetString("agent")
+		externalDeps, _ := cmd.Flags().GetString("external-deps")
+		externalBlocks, _ := cmd.Flags().GetString("external-blocks")
+
 		// Direct mode
 		issue := &types.Issue{
 			ID:                 explicitID, // Set explicit ID if provided (empty string if not)
@@ -261,6 +271,15 @@ var createCmd = &cobra.Command{
 			Assignee:           assignee,
 			ExternalRef:        externalRefPtr,
 			EstimatedMinutes:   estimatedMinutes,
+			// Dispatch fields (jw fork)
+			Capabilities:   capabilities,
+			Context:        context,
+			ContextFiles:   contextFiles,
+			ContextBeads:   contextBeads,
+			Complexity:     complexity,
+			Agent:          agent,
+			ExternalDeps:   externalDeps,
+			ExternalBlocks: externalBlocks,
 		}
 
 		ctx := rootCtx

@@ -20,6 +20,17 @@ func registerCommonIssueFlags(cmd *cobra.Command) {
 	cmd.Flags().String("design", "", "Design notes")
 	cmd.Flags().String("acceptance", "", "Acceptance criteria")
 	cmd.Flags().String("external-ref", "", "External reference (e.g., 'gh-9', 'jira-ABC')")
+
+	// Dispatch fields (jw fork): capability-based routing and context preservation
+	// TOON format: space or comma separated, parsed liberally (Postel's law)
+	cmd.Flags().String("capabilities", "", "Required capabilities (TOON: 'mcp-tools playwright gpu')")
+	cmd.Flags().String("context", "", "Required context (TOON: 'auth-system-design gpu-pipeline')")
+	cmd.Flags().String("context-files", "", "Context file paths (TOON: 'docs/auth.md src/auth/')")
+	cmd.Flags().String("context-beads", "", "Related beads (TOON: 'game1-abc host:/path:id')")
+	cmd.Flags().String("complexity", "", "Estimated complexity (trivial|low|medium|high)")
+	cmd.Flags().String("agent", "", "Recommended agent (claude-opus|gemini-2.5-pro|claude-sonnet)")
+	cmd.Flags().String("external-deps", "", "Cross-repo dependencies (TOON: 'host:/path:id')")
+	cmd.Flags().String("external-blocks", "", "Cross-repo blocks (TOON: 'host:/path:id')")
 }
 
 // getDescriptionFlag retrieves the description value, checking --body-file, --description-file,
